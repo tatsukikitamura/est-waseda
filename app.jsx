@@ -1,19 +1,7 @@
-/* global React, ReactDOM, useTweaks, TweaksPanel, TweakSection, TweakColor, TweakSelect, TweakRadio */
-const { useState, useEffect, useRef } = React;
+/* global React, ReactDOM */
+const { useEffect } = React;
 
-const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
-  "primaryColor": "#C8553D",
-  "forestColor": "#3A4D39",
-  "mustardColor": "#E8B04B",
-  "creamColor": "#F5EDE0",
-  "headingFont": "fraunces",
-  "showStickers": true,
-  "heroVariant": "big-type"
-}/*EDITMODE-END*/;
-
-// ============================================================
-// Reveal-on-scroll hook
-// ============================================================
+// Reveal-on-scroll
 function useReveal() {
   useEffect(() => {
     const els = document.querySelectorAll('.reveal');
@@ -26,8 +14,6 @@ function useReveal() {
       });
     }, { threshold: 0, rootMargin: '0px 0px -10% 0px' });
     els.forEach(el => io.observe(el));
-    // Safety fallback: if anything stayed hidden after 2s (e.g. user
-    // jumped via anchor link past it), force-reveal everything.
     const t = setTimeout(() => {
       document.querySelectorAll('.reveal:not(.in)').forEach(el => el.classList.add('in'));
     }, 2500);
@@ -35,9 +21,7 @@ function useReveal() {
   }, []);
 }
 
-// ============================================================
-// Photo placeholder — user will swap with real images later
-// ============================================================
+// Photo placeholder
 function Photo({ label, ratio = "4/5", rotate = 0, tone = "default" }) {
   const tones = {
     default: "linear-gradient(135deg, rgba(58,77,57,0.22), rgba(200,85,61,0.22))",
@@ -51,7 +35,7 @@ function Photo({ label, ratio = "4/5", rotate = 0, tone = "default" }) {
       style={{
         aspectRatio: ratio,
         transform: `rotate(${rotate}deg)`,
-        background: `${tones[tone]}, var(--cream-deep)`
+        background: `${tones[tone]}, #ECE0CD`
       }}
     >
       <span>📷 {label}</span>
@@ -59,21 +43,16 @@ function Photo({ label, ratio = "4/5", rotate = 0, tone = "default" }) {
   );
 }
 
-// ============================================================
-// Floating decorations — small SVG shapes scattered around
-// ============================================================
+// Floating decoration
 function Decor({ children, top, left, right, bottom, rot = 0, delay = 0, size = 60 }) {
   return (
     <div
-      className="float"
+      className="absolute pointer-events-none z-[1] animate-float-y"
       style={{
-        position: 'absolute',
         top, left, right, bottom,
         width: size, height: size,
         '--rot': `${rot}deg`,
         animationDelay: `${delay}s`,
-        pointerEvents: 'none',
-        zIndex: 1
       }}
     >
       {children}
@@ -118,48 +97,22 @@ const PalmSVG = ({ color = "#3A4D39" }) => (
   </svg>
 );
 
-// ============================================================
 // HERO
-// ============================================================
-function Hero({ tweaks }) {
+function Hero() {
   return (
-    <section style={{
-      position: 'relative',
-      minHeight: '100vh',
-      padding: '40px 24px 80px',
-      overflow: 'hidden'
-    }}>
-      {/* Decorations */}
-      <Decor top="80px" right="8%" rot={-8} size={70}><SunSVG color={tweaks.mustardColor}/></Decor>
-      <Decor top="240px" left="5%" rot={12} delay={1} size={36}><StarSVG color={tweaks.primaryColor}/></Decor>
-      <Decor bottom="180px" right="12%" rot={6} delay={2} size={50}><StarSVG color={tweaks.forestColor}/></Decor>
-      <Decor bottom="60px" left="8%" rot={0} delay={0.5} size={90}><PalmSVG color={tweaks.forestColor}/></Decor>
-      <Decor top="50%" right="3%" rot={0} delay={1.5} size={80}><WaveSVG color={tweaks.forestColor}/></Decor>
+    <section className="relative min-h-screen px-6 pt-10 pb-20 overflow-hidden">
+      <Decor top="80px" right="8%" rot={-8} size={70}><SunSVG/></Decor>
+      <Decor top="240px" left="5%" rot={12} delay={1} size={36}><StarSVG/></Decor>
+      <Decor bottom="180px" right="12%" rot={6} delay={2} size={50}><StarSVG color="#3A4D39"/></Decor>
+      <Decor bottom="60px" left="8%" rot={0} delay={0.5} size={90}><PalmSVG/></Decor>
+      <Decor top="50%" right="3%" rot={0} delay={1.5} size={80}><WaveSVG/></Decor>
 
-      {/* Top nav strip */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        maxWidth: 1100,
-        margin: '0 auto 60px',
-        position: 'relative',
-        zIndex: 2,
-        flexWrap: 'wrap',
-        gap: 16
-      }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
-          <span className="display" style={{
-            fontWeight: 800,
-            fontSize: 32,
-            letterSpacing: '-0.04em',
-            color: 'var(--forest)'
-          }}>EST</span>
-          <span className="mono" style={{ fontSize: 12, color: 'var(--forest)', opacity: 0.7 }}>
-            since 2003 · 早稲田大学公認
-          </span>
+      <div className="flex items-center justify-between max-w-[1100px] mx-auto mb-16 relative z-[2] flex-wrap gap-4">
+        <div className="flex items-baseline gap-3">
+          <span className="font-display font-extrabold text-[32px] tracking-tighter text-forest">EST</span>
+          <span className="font-mono text-[12px] text-forest opacity-70">since 2003 · 早稲田大学公認</span>
         </div>
-        <nav style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        <nav className="flex gap-2 flex-wrap">
           <a href="#about" className="anchor-pill">about</a>
           <a href="#story" className="anchor-pill">story</a>
           <a href="#info" className="anchor-pill">info</a>
@@ -167,86 +120,42 @@ function Hero({ tweaks }) {
         </nav>
       </div>
 
-      {/* Hero content */}
-      <div style={{
-        maxWidth: 1100,
-        margin: '0 auto',
-        position: 'relative',
-        zIndex: 2
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
-          {tweaks.showStickers && <span className="sticker">2026 新メンバー募集中</span>}
-          <span className="mono" style={{ fontSize: 13, color: 'var(--forest)', opacity: 0.8 }}>
-            ⌖ 早稲田大学 / フィリピン・パンダノン島
-          </span>
+      <div className="max-w-[1100px] mx-auto relative z-[2]">
+        <div className="flex items-center gap-3 mb-6 flex-wrap">
+          <span className="sticker">2026 新メンバー募集中</span>
+          <span className="font-mono text-[13px] text-forest opacity-80">⌖ 早稲田大学 / フィリピン・パンダノン島</span>
         </div>
 
         <h1
-          className="display hero-headline"
-          style={{
-            fontSize: 'clamp(56px, 11vw, 156px)',
-            lineHeight: 0.88,
-            letterSpacing: '-0.04em',
-            margin: '0 0 28px',
-            fontWeight: 800,
-            color: 'var(--forest)'
-          }}
+          className="font-display font-extrabold text-forest m-0 mb-7"
+          style={{ fontSize: 'clamp(56px, 11vw, 156px)', lineHeight: 0.88, letterSpacing: '-0.04em' }}
         >
-          <span style={{ display: 'block' }}>心の</span>
-          <span style={{
-            display: 'block',
-            color: 'var(--terra)',
-            fontStyle: 'italic',
-            fontWeight: 600
-          }}>
-            ボランティア、
-          </span>
-          <span style={{ display: 'block' }}>はじめよう。</span>
+          <span className="block">心の</span>
+          <span className="block text-terra italic font-semibold">ボランティア、</span>
+          <span className="block">はじめよう。</span>
         </h1>
 
         <p
-          className="maru"
-          style={{
-            fontSize: 'clamp(16px, 2vw, 20px)',
-            maxWidth: 580,
-            lineHeight: 1.9,
-            color: 'var(--ink)',
-            margin: '0 0 40px',
-            fontWeight: 500
-          }}
+          className="font-maru max-w-[580px] text-ink m-0 mb-10 font-medium"
+          style={{ fontSize: 'clamp(16px, 2vw, 20px)', lineHeight: 1.9 }}
         >
           電気もガスもない、政府から見捨てられた島。<br/>
           僕らに資金は出せない。だけど、<br/>
           <span className="squiggle">学生にできる支援が、ここにある。</span>
         </p>
 
-        <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'center' }}>
+        <div className="flex gap-4 flex-wrap items-center">
           <a href="#join" className="btn-primary">
             <span>サークルに参加する</span>
-            <span style={{ fontSize: 22 }}>→</span>
+            <span className="text-[22px]">→</span>
           </a>
-          <a href="#story" style={{
-            color: 'var(--forest)',
-            textDecoration: 'underline',
-            textUnderlineOffset: 6,
-            textDecorationThickness: 2,
-            fontWeight: 600,
-            fontSize: 15
-          }}>
+          <a href="#story" className="text-forest underline underline-offset-[6px] decoration-2 font-semibold text-[15px]">
             まずは活動を見る
           </a>
         </div>
 
-        {/* Bottom info strip */}
-        <div style={{
-          marginTop: 80,
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
-          gap: 24,
-          paddingTop: 32,
-          borderTop: '2px solid var(--forest)',
-          maxWidth: 800
-        }}>
+        <div className="mt-20 grid gap-6 pt-8 border-t-2 border-forest max-w-[800px]"
+             style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
           <Stat num="10" unit="日間" label="夏のフィリピン渡航" />
           <Stat num="12" unit="人" label="現役メンバー" />
           <Stat num="23" unit="期" label="続いてきた歴史" />
@@ -260,55 +169,25 @@ function Hero({ tweaks }) {
 function Stat({ num, unit, label }) {
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
-        <span className="stat-num" style={{ fontSize: 56, color: 'var(--forest)' }}>{num}</span>
-        <span style={{ fontSize: 14, color: 'var(--forest)', fontWeight: 600 }}>{unit}</span>
+      <div className="flex items-baseline gap-1">
+        <span className="stat-num text-forest text-[56px]">{num}</span>
+        <span className="text-forest text-sm font-semibold">{unit}</span>
       </div>
-      <div style={{ fontSize: 12, color: 'var(--forest)', opacity: 0.75, fontWeight: 500, letterSpacing: '0.05em' }}>
-        {label}
-      </div>
+      <div className="text-[12px] text-forest opacity-75 font-medium tracking-wider">{label}</div>
     </div>
   );
 }
 
-// ============================================================
-// MARQUEE — strip of running text
-// ============================================================
+// MARQUEE
 function Marquee() {
-  const items = [
-    "PHILIPPINES",
-    "★",
-    "PANDANON ISLAND",
-    "★",
-    "STUDENT NGO EST",
-    "★",
-    "WASEDA UNIVERSITY",
-    "★",
-    "心のボランティア",
-    "★"
-  ];
+  const items = ["PHILIPPINES", "★", "PANDANON ISLAND", "★", "STUDENT NGO EST", "★", "WASEDA UNIVERSITY", "★", "心のボランティア", "★"];
   const doubled = [...items, ...items, ...items, ...items];
   return (
-    <div style={{
-      background: 'var(--forest)',
-      color: 'var(--cream)',
-      padding: '20px 0',
-      overflow: 'hidden',
-      borderTop: '3px solid var(--ink)',
-      borderBottom: '3px solid var(--ink)',
-      transform: 'rotate(-1.5deg)',
-      margin: '0 -8px',
-      position: 'relative',
-      zIndex: 3
-    }}>
-      <div className="marquee-track">
+    <div className="bg-forest text-cream py-5 overflow-hidden border-y-[3px] border-ink relative z-[3] -mx-2"
+         style={{ transform: 'rotate(-1.5deg)' }}>
+      <div className="flex gap-12 w-max animate-scroll-x">
         {doubled.map((t, i) => (
-          <span key={i} className="display" style={{
-            fontSize: 36,
-            fontWeight: 800,
-            letterSpacing: '-0.02em',
-            whiteSpace: 'nowrap'
-          }}>
+          <span key={i} className="font-display text-[36px] font-extrabold tracking-tight whitespace-nowrap">
             {t}
           </span>
         ))}
@@ -317,82 +196,45 @@ function Marquee() {
   );
 }
 
-// ============================================================
-// ABOUT — what is EST
-// ============================================================
+// ABOUT
 function About() {
   return (
-    <section id="about" style={{ padding: '120px 24px', position: 'relative' }}>
-      <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-        <div className="reveal" style={{ marginBottom: 48 }}>
-          <span className="mono" style={{
-            fontSize: 13,
-            color: 'var(--terra)',
-            letterSpacing: '0.15em',
-            fontWeight: 600
-          }}>
-            01 — ABOUT US
-          </span>
+    <section id="about" className="py-[120px] px-6 relative">
+      <div className="max-w-[1100px] mx-auto">
+        <div className="reveal mb-12">
+          <span className="font-mono text-[13px] text-terra tracking-[0.15em] font-semibold">01 — ABOUT US</span>
           <h2
-            className="display section-title"
-            style={{
-              fontSize: 'clamp(40px, 7vw, 88px)',
-              fontWeight: 800,
-              lineHeight: 0.95,
-              letterSpacing: '-0.03em',
-              margin: '12px 0 0',
-              color: 'var(--forest)'
-            }}
+            className="font-display font-extrabold text-forest mt-3"
+            style={{ fontSize: 'clamp(40px, 7vw, 88px)', lineHeight: 0.95, letterSpacing: '-0.03em' }}
           >
             学生NGO EST<br/>
-            <span style={{ fontStyle: 'italic', color: 'var(--terra)', fontWeight: 600 }}>って、なに？</span>
+            <span className="italic text-terra font-semibold">って、なに？</span>
           </h2>
         </div>
 
-        <div className="reveal" style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-          gap: 48,
-          alignItems: 'start'
-        }}>
+        <div className="reveal grid gap-12 items-start"
+             style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>
           <div>
-            <p className="maru" style={{ fontSize: 18, lineHeight: 2, fontWeight: 500 }}>
+            <p className="font-maru text-lg leading-loose font-medium">
               フィリピンで教育支援をしている、<br/>
               早稲田大学のボランティアサークルです。
             </p>
-            <p style={{ fontSize: 15, lineHeight: 2, color: 'var(--ink)', marginTop: 24 }}>
-              支援地は、セブから船で渡る<strong style={{ color: 'var(--terra)' }}>パンダノン島</strong>。
+            <p className="text-[15px] leading-loose text-ink mt-6">
+              支援地は、セブから船で渡る<strong className="text-terra">パンダノン島</strong>。
               電気もガスも通っていない、政府から見捨てられた小さな島です。
               夏に10日間、現地に滞在して子どもたちと一緒に過ごします。
             </p>
-            <p style={{ fontSize: 15, lineHeight: 2, color: 'var(--ink)', marginTop: 16 }}>
+            <p className="text-[15px] leading-loose text-ink mt-4">
               「<strong>学生にできる最大の支援を</strong>」をモットーに、
               自分たちにどんなことができるのか、毎週話し合いながら活動しています。
             </p>
           </div>
 
-          <div style={{
-            background: 'var(--paper)',
-            padding: 32,
-            border: '2px solid var(--forest)',
-            borderRadius: 4,
-            position: 'relative'
-          }}>
-            <div style={{
-              position: 'absolute',
-              top: -14,
-              left: 24,
-              background: 'var(--terra)',
-              color: 'var(--paper)',
-              padding: '4px 14px',
-              fontSize: 12,
-              fontWeight: 700,
-              letterSpacing: '0.1em',
-              fontFamily: 'DM Mono, monospace'
-            }}>
+          <div className="bg-paper p-8 border-2 border-forest rounded-[4px] relative">
+            <div className="absolute -top-3.5 left-6 bg-terra text-paper px-3.5 py-1 text-[12px] font-bold tracking-widest font-mono">
               QUICK FACTS
             </div>
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <ul className="list-none p-0 m-0 flex flex-col gap-3.5">
               {[
                 ["📍", "活動拠点", "早稲田大学・教室"],
                 ["🌴", "支援地", "フィリピン パンダノン島"],
@@ -401,11 +243,11 @@ function About() {
                 ["💰", "会費", "4,000円"],
                 ["📚", "カテゴリ", "教育・国際ボランティア"]
               ].map(([icon, k, v]) => (
-                <li key={k} style={{ display: 'flex', gap: 14, alignItems: 'baseline' }}>
-                  <span style={{ fontSize: 18 }}>{icon}</span>
-                  <div style={{ flex: 1, display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed rgba(58,77,57,0.3)', paddingBottom: 8 }}>
-                    <span style={{ color: 'var(--forest)', fontWeight: 600, fontSize: 13 }}>{k}</span>
-                    <span style={{ fontWeight: 600, fontSize: 14, textAlign: 'right' }}>{v}</span>
+                <li key={k} className="flex gap-3.5 items-baseline">
+                  <span className="text-lg">{icon}</span>
+                  <div className="flex-1 flex justify-between border-b border-dashed pb-2" style={{ borderColor: 'rgba(58,77,57,0.3)' }}>
+                    <span className="text-forest font-semibold text-[13px]">{k}</span>
+                    <span className="font-semibold text-sm text-right">{v}</span>
                   </div>
                 </li>
               ))}
@@ -417,62 +259,35 @@ function About() {
   );
 }
 
-// ============================================================
-// HEART OF VOLUNTEERING — the BIG idea
-// ============================================================
+// HEART
 function HeartSection() {
   return (
-    <section style={{
-      background: 'var(--forest)',
-      color: 'var(--cream)',
-      padding: '140px 24px',
-      position: 'relative',
-      overflow: 'hidden'
-    }}>
-      {/* Decorative shape */}
-      <Decor top="40px" right="6%" rot={15} size={70}><SunSVG color="#E8B04B"/></Decor>
+    <section className="bg-forest text-cream py-[140px] px-6 relative overflow-hidden">
+      <Decor top="40px" right="6%" rot={15} size={70}><SunSVG/></Decor>
       <Decor bottom="60px" left="6%" rot={-10} delay={1.2} size={50}><StarSVG color="#E8B04B"/></Decor>
 
-      <div className="reveal" style={{ maxWidth: 1000, margin: '0 auto', position: 'relative', zIndex: 2 }}>
-        <span className="mono" style={{
-          fontSize: 13,
-          color: 'var(--mustard)',
-          letterSpacing: '0.15em',
-          fontWeight: 600
-        }}>
-          02 — OUR PHILOSOPHY
-        </span>
+      <div className="reveal max-w-[1000px] mx-auto relative z-[2]">
+        <span className="font-mono text-[13px] text-mustard tracking-[0.15em] font-semibold">02 — OUR PHILOSOPHY</span>
 
         <p
-          className="display"
-          style={{
-            fontSize: 'clamp(32px, 5.5vw, 68px)',
-            lineHeight: 1.25,
-            fontWeight: 600,
-            fontStyle: 'italic',
-            margin: '24px 0 40px',
-            letterSpacing: '-0.02em'
-          }}
+          className="font-display italic font-semibold my-10"
+          style={{ fontSize: 'clamp(32px, 5.5vw, 68px)', lineHeight: 1.25, letterSpacing: '-0.02em' }}
         >
           資金じゃなく、<br/>
-          <span style={{ color: 'var(--mustard)' }}>「心」を、</span><br/>
+          <span className="text-mustard">「心」を、</span><br/>
           置いてくる。
         </p>
 
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-          gap: 32,
-          marginTop: 60
-        }}>
+        <div className="grid gap-8 mt-16"
+             style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))' }}>
           <div>
-            <p className="maru" style={{ fontSize: 17, lineHeight: 2, fontWeight: 500 }}>
+            <p className="font-maru text-[17px] leading-loose font-medium">
               僕らは、お金を渡しに行くわけじゃない。<br/>
-              <span style={{ color: 'var(--mustard)' }}>大学生だからできる、ちいさなボランティア</span>を、大事にしてます。
+              <span className="text-mustard">大学生だからできる、ちいさなボランティア</span>を、大事にしてます。
             </p>
           </div>
           <div>
-            <p style={{ fontSize: 14, lineHeight: 2, opacity: 0.85 }}>
+            <p className="text-sm leading-loose opacity-85">
               支援地でホームステイをして、現地の子どもたちと一緒に暮らす。
               僕らが歯磨きをすれば、子どもたちも真似をする。
               いつか壊れてしまうモノじゃなくて、代々伝わる知恵を残していく。
@@ -481,32 +296,17 @@ function HeartSection() {
           </div>
         </div>
 
-        {/* Three pillars */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-          gap: 24,
-          marginTop: 80
-        }}>
+        <div className="grid gap-6 mt-20"
+             style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
           {[
             { n: "01", t: "ホームステイ型", d: "現地の家族と暮らす。地域に深く入る。" },
             { n: "02", t: "知恵を残す", d: "モノじゃなく、伝わる習慣をつくる。" },
             { n: "03", t: "夢を応援する", d: "胸を張って夢を追える子を、増やしたい。" }
           ].map(p => (
-            <div key={p.n} style={{
-              borderTop: '2px solid var(--mustard)',
-              paddingTop: 20
-            }}>
-              <div className="mono" style={{ fontSize: 12, color: 'var(--mustard)', letterSpacing: '0.1em', marginBottom: 8 }}>
-                {p.n}
-              </div>
-              <h3 className="display" style={{
-                fontSize: 24,
-                fontWeight: 700,
-                margin: '0 0 12px',
-                letterSpacing: '-0.01em'
-              }}>{p.t}</h3>
-              <p style={{ fontSize: 14, lineHeight: 1.8, opacity: 0.85, margin: 0 }}>{p.d}</p>
+            <div key={p.n} className="border-t-2 border-mustard pt-5">
+              <div className="font-mono text-[12px] text-mustard tracking-wider mb-2">{p.n}</div>
+              <h3 className="font-display text-2xl font-bold m-0 mb-3 tracking-tight">{p.t}</h3>
+              <p className="text-sm leading-relaxed opacity-85 m-0">{p.d}</p>
             </div>
           ))}
         </div>
@@ -515,90 +315,53 @@ function HeartSection() {
   );
 }
 
-// ============================================================
-// STORY — the photo / episode section
-// ============================================================
+// STORY
 function Story() {
   return (
-    <section id="story" style={{ padding: '120px 24px', position: 'relative', overflow: 'hidden' }}>
-      <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-        <div className="reveal" style={{ marginBottom: 60, maxWidth: 700 }}>
-          <span className="mono" style={{
-            fontSize: 13,
-            color: 'var(--terra)',
-            letterSpacing: '0.15em',
-            fontWeight: 600
-          }}>
-            03 — A STORY FROM THE ISLAND
-          </span>
-          <h2 className="display section-title" style={{
-            fontSize: 'clamp(40px, 6vw, 76px)',
-            lineHeight: 0.98,
-            letterSpacing: '-0.03em',
-            fontWeight: 800,
-            margin: '12px 0 0',
-            color: 'var(--forest)'
-          }}>
+    <section id="story" className="py-[120px] px-6 relative overflow-hidden">
+      <div className="max-w-[1200px] mx-auto">
+        <div className="reveal mb-16 max-w-[700px]">
+          <span className="font-mono text-[13px] text-terra tracking-[0.15em] font-semibold">03 — A STORY FROM THE ISLAND</span>
+          <h2
+            className="font-display font-extrabold text-forest mt-3"
+            style={{ fontSize: 'clamp(40px, 6vw, 76px)', lineHeight: 0.98, letterSpacing: '-0.03em' }}
+          >
             生まれた場所で、<br/>
-            <span style={{ fontStyle: 'italic', color: 'var(--terra)', fontWeight: 600 }}>夢を、</span>あきらめない。
+            <span className="italic text-terra font-semibold">夢を、</span>あきらめない。
           </h2>
         </div>
 
-        {/* Photo collage */}
-        <div className="reveal" style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(12, 1fr)',
-          gap: 24,
-          marginBottom: 80
-        }}>
-          <div style={{ gridColumn: 'span 5', transform: 'rotate(-2deg)' }} className="polaroid">
+        <div className="reveal grid grid-cols-12 gap-6 mb-20">
+          <div className="col-span-12 md:col-span-5 polaroid" style={{ transform: 'rotate(-2deg)' }}>
             <Photo label="子どもたちとの写真をここに" tone="sunset" ratio="4/5" />
-            <div style={{ marginTop: 14, fontFamily: 'Caveat, cursive', fontSize: 18, textAlign: 'center', color: 'var(--forest)', fontStyle: 'italic' }}>
+            <div className="mt-3.5 font-caveat text-lg text-center text-forest italic">
               みんなで歯みがきタイム ✦
             </div>
           </div>
-          <div style={{ gridColumn: 'span 7', display: 'flex', flexDirection: 'column', gap: 24 }}>
-            <div style={{ transform: 'rotate(1.5deg)' }} className="polaroid">
+          <div className="col-span-12 md:col-span-7 flex flex-col gap-6">
+            <div className="polaroid" style={{ transform: 'rotate(1.5deg)' }}>
               <Photo label="島の風景・海の写真をここに" tone="sea" ratio="16/9" />
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
-              <div style={{ transform: 'rotate(-1deg)' }} className="polaroid">
+            <div className="grid grid-cols-2 gap-6">
+              <div className="polaroid" style={{ transform: 'rotate(-1deg)' }}>
                 <Photo label="授業の様子" tone="default" ratio="1/1" />
               </div>
-              <div style={{ transform: 'rotate(2deg)' }} className="polaroid">
+              <div className="polaroid" style={{ transform: 'rotate(2deg)' }}>
                 <Photo label="メンバー集合写真" tone="jungle" ratio="1/1" />
               </div>
             </div>
           </div>
         </div>
 
-        {/* Quote */}
-        <div className="reveal" style={{
-          maxWidth: 760,
-          margin: '0 auto',
-          padding: '48px 0',
-          borderTop: '2px solid var(--forest)',
-          borderBottom: '2px solid var(--forest)',
-          textAlign: 'center'
-        }}>
-          <div style={{
-            fontSize: 60,
-            lineHeight: 0.5,
-            color: 'var(--terra)',
-            fontFamily: 'Fraunces, serif',
-            marginBottom: 8
-          }}>"</div>
-          <p className="display" style={{
-            fontSize: 'clamp(22px, 3.2vw, 34px)',
-            lineHeight: 1.6,
-            fontStyle: 'italic',
-            fontWeight: 600,
-            color: 'var(--forest)',
-            margin: 0
-          }}>
+        <div className="reveal max-w-[760px] mx-auto py-12 border-y-2 border-forest text-center">
+          <div className="text-[60px] text-terra font-display mb-2" style={{ lineHeight: 0.5 }}>"</div>
+          <p
+            className="font-display italic font-semibold text-forest m-0"
+            style={{ fontSize: 'clamp(22px, 3.2vw, 34px)', lineHeight: 1.6 }}
+          >
             「本を読んで、広い世界をみせてあげよう」<br/>
             「ゴミは、ゴミ箱に捨てようね」<br/>
-            <span style={{ color: 'var(--terra)' }}>そんな小さな一つひとつが、教育支援。</span>
+            <span className="text-terra">そんな小さな一つひとつが、教育支援。</span>
           </p>
         </div>
       </div>
@@ -606,89 +369,59 @@ function Story() {
   );
 }
 
-// ============================================================
-// ACTIVITY CALENDAR
-// ============================================================
+// CALENDAR
 function Calendar() {
   const months = [
-    { m: "5月", e: "新メンバー入会", k: "kickoff", color: "mustard" },
-    { m: "毎週火", e: "ミーティング 18:30〜", k: "weekly", color: "forest" },
-    { m: "夏", e: "パンダノン島 渡航 (10日間)", k: "trip", color: "terra", big: true },
-    { m: "11月", e: "早稲田祭で発表", k: "fest", color: "forest" },
-    { m: "3月", e: "春渡航・カモテス諸島", k: "trip", color: "terra" }
+    { m: "5月", e: "新メンバー入会", k: "kickoff" },
+    { m: "毎週火", e: "ミーティング 18:30〜", k: "weekly" },
+    { m: "夏", e: "パンダノン島 渡航 (10日間)", k: "trip", big: true },
+    { m: "11月", e: "早稲田祭で発表", k: "fest" },
+    { m: "3月", e: "春渡航・カモテス諸島", k: "trip" }
   ];
 
   return (
-    <section style={{
-      background: 'var(--cream-deep)',
-      padding: '120px 24px',
-      position: 'relative'
-    }}>
-      <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-        <div className="reveal" style={{ marginBottom: 60 }}>
-          <span className="mono" style={{
-            fontSize: 13,
-            color: 'var(--terra)',
-            letterSpacing: '0.15em',
-            fontWeight: 600
-          }}>
-            04 — YEAR AT A GLANCE
-          </span>
-          <h2 className="display section-title" style={{
-            fontSize: 'clamp(40px, 6vw, 76px)',
-            lineHeight: 0.98,
-            fontWeight: 800,
-            letterSpacing: '-0.03em',
-            margin: '12px 0 0',
-            color: 'var(--forest)'
-          }}>
-            一年の<span style={{ fontStyle: 'italic', color: 'var(--terra)', fontWeight: 600 }}>うごき</span>。
+    <section id="info" className="bg-cream-deep py-[120px] px-6 relative">
+      <div className="max-w-[1100px] mx-auto">
+        <div className="reveal mb-16">
+          <span className="font-mono text-[13px] text-terra tracking-[0.15em] font-semibold">04 — YEAR AT A GLANCE</span>
+          <h2
+            className="font-display font-extrabold text-forest mt-3"
+            style={{ fontSize: 'clamp(40px, 6vw, 76px)', lineHeight: 0.98, letterSpacing: '-0.03em' }}
+          >
+            一年の<span className="italic text-terra font-semibold">うごき</span>。
           </h2>
         </div>
 
-        <div className="reveal" style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <div className="reveal flex flex-col gap-1">
           {months.map((m, i) => (
-            <div key={i} style={{
-              display: 'grid',
-              gridTemplateColumns: '120px 1fr auto',
-              gap: 24,
-              alignItems: 'center',
-              padding: m.big ? '28px 24px' : '18px 24px',
-              background: m.big ? 'var(--forest)' : 'var(--paper)',
-              color: m.big ? 'var(--cream)' : 'var(--ink)',
-              borderRadius: 4,
-              border: m.big ? 'none' : '1.5px solid rgba(58,77,57,0.15)',
-              transition: 'transform .2s ease',
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.transform = 'translateX(8px)'}
-            onMouseLeave={(e) => e.currentTarget.style.transform = 'translateX(0)'}
+            <div
+              key={i}
+              className={`grid gap-6 items-center rounded-[4px] transition-transform duration-200 ${
+                m.big ? 'bg-forest text-cream py-7 px-6' : 'bg-paper text-ink py-[18px] px-6 border-[1.5px]'
+              }`}
+              style={{
+                gridTemplateColumns: '120px 1fr auto',
+                borderColor: m.big ? 'transparent' : 'rgba(58,77,57,0.15)',
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.transform = 'translateX(8px)'}
+              onMouseLeave={(e) => e.currentTarget.style.transform = 'translateX(0)'}
             >
-              <div className="display" style={{
-                fontSize: m.big ? 32 : 24,
-                fontWeight: 700,
-                color: m.big ? 'var(--mustard)' : 'var(--terra)',
-                letterSpacing: '-0.02em'
-              }}>
+              <div
+                className={`font-display font-bold tracking-tight ${m.big ? 'text-[32px] text-mustard' : 'text-2xl text-terra'}`}
+              >
                 {m.m}
               </div>
-              <div style={{ fontSize: m.big ? 22 : 16, fontWeight: m.big ? 700 : 500 }}>
+              <div className={m.big ? 'text-[22px] font-bold' : 'text-base font-medium'}>
                 {m.e}
               </div>
-              <div style={{ fontSize: 11, fontFamily: 'DM Mono, monospace', opacity: 0.7, letterSpacing: '0.1em' }}>
+              <div className="text-[11px] font-mono opacity-70 tracking-wider">
                 {m.k.toUpperCase()}
               </div>
             </div>
           ))}
         </div>
 
-        <p className="reveal" style={{
-          marginTop: 40,
-          fontSize: 13,
-          color: 'var(--forest)',
-          opacity: 0.7,
-          textAlign: 'center',
-          fontFamily: 'DM Mono, monospace'
-        }}>
+        <p className="reveal mt-10 text-[13px] text-forest opacity-70 text-center font-mono">
           ※ 春は カモテス諸島ラナオバランガイ、夏は パンダノン島 へ渡航
         </p>
       </div>
@@ -696,129 +429,53 @@ function Calendar() {
   );
 }
 
-// ============================================================
-// VOICES — fake-y but plausible member voices
-// ============================================================
+// VOICES
 function Voices() {
   const voices = [
-    {
-      name: "Aさん",
-      year: "教育学部 3年",
-      quote: "10日間、電気もガスもない島で過ごす。最初は不安だったけど、子どもたちの笑顔で全部吹っ飛んだ。",
-      rot: -1.5
-    },
-    {
-      name: "Bさん",
-      year: "国際教養 2年",
-      quote: "毎週火曜のミーティングが、いちばん楽しい時間。みんな真剣で、でも笑いが絶えない。",
-      rot: 1
-    },
-    {
-      name: "Cさん",
-      year: "文化構想 1年",
-      quote: "「学生にできる支援って何?」っていう問いに、ずっと向き合えるサークル。",
-      rot: -0.5
-    }
+    { name: "Aさん", year: "教育学部 3年", quote: "10日間、電気もガスもない島で過ごす。最初は不安だったけど、子どもたちの笑顔で全部吹っ飛んだ。", rot: -1.5 },
+    { name: "Bさん", year: "国際教養 2年", quote: "毎週火曜のミーティングが、いちばん楽しい時間。みんな真剣で、でも笑いが絶えない。", rot: 1 },
+    { name: "Cさん", year: "文化構想 1年", quote: "「学生にできる支援って何?」っていう問いに、ずっと向き合えるサークル。", rot: -0.5 }
   ];
 
   return (
-    <section style={{ padding: '120px 24px' }}>
-      <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-        <div className="reveal" style={{ marginBottom: 60 }}>
-          <span className="mono" style={{
-            fontSize: 13,
-            color: 'var(--terra)',
-            letterSpacing: '0.15em',
-            fontWeight: 600
-          }}>
-            05 — MEMBER VOICES
-          </span>
-          <h2 className="display section-title" style={{
-            fontSize: 'clamp(40px, 6vw, 76px)',
-            lineHeight: 0.98,
-            fontWeight: 800,
-            letterSpacing: '-0.03em',
-            margin: '12px 0 0',
-            color: 'var(--forest)'
-          }}>
-            メンバーの<span style={{ fontStyle: 'italic', color: 'var(--terra)', fontWeight: 600 }}>こえ</span>。
+    <section className="py-[120px] px-6">
+      <div className="max-w-[1100px] mx-auto">
+        <div className="reveal mb-16">
+          <span className="font-mono text-[13px] text-terra tracking-[0.15em] font-semibold">05 — MEMBER VOICES</span>
+          <h2
+            className="font-display font-extrabold text-forest mt-3"
+            style={{ fontSize: 'clamp(40px, 6vw, 76px)', lineHeight: 0.98, letterSpacing: '-0.03em' }}
+          >
+            メンバーの<span className="italic text-terra font-semibold">こえ</span>。
           </h2>
         </div>
 
-        <div className="reveal" style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-          gap: 32
-        }}>
+        <div className="reveal grid gap-8"
+             style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))' }}>
           {voices.map((v, i) => (
-            <div key={i} style={{
-              background: 'var(--paper)',
-              padding: '32px 28px',
-              border: '2px solid var(--forest)',
-              borderRadius: 4,
-              transform: `rotate(${v.rot}deg)`,
-              position: 'relative',
-              transition: 'transform .25s ease'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.transform = 'rotate(0deg) translateY(-4px)'}
-            onMouseLeave={(e) => e.currentTarget.style.transform = `rotate(${v.rot}deg)`}
+            <div
+              key={i}
+              className="bg-paper py-8 px-7 border-2 border-forest rounded-[4px] relative transition-transform duration-200"
+              style={{ transform: `rotate(${v.rot}deg)` }}
+              onMouseEnter={(e) => e.currentTarget.style.transform = 'rotate(0deg) translateY(-4px)'}
+              onMouseLeave={(e) => e.currentTarget.style.transform = `rotate(${v.rot}deg)`}
             >
-              <div style={{
-                fontSize: 48,
-                lineHeight: 0.4,
-                color: 'var(--terra)',
-                fontFamily: 'Fraunces, serif',
-                marginBottom: 12
-              }}>"</div>
-              <p className="maru" style={{
-                fontSize: 16,
-                lineHeight: 1.9,
-                fontWeight: 500,
-                margin: '0 0 24px'
-              }}>
-                {v.quote}
-              </p>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 12,
-                paddingTop: 16,
-                borderTop: '1.5px dashed rgba(58,77,57,0.3)'
-              }}>
-                <div style={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: '50%',
-                  background: 'var(--mustard)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: 14,
-                  fontWeight: 800,
-                  color: 'var(--ink)',
-                  border: '2px solid var(--ink)'
-                }}>
+              <div className="text-[48px] text-terra font-display mb-3" style={{ lineHeight: 0.4 }}>"</div>
+              <p className="font-maru text-base leading-loose font-medium m-0 mb-6">{v.quote}</p>
+              <div className="flex items-center gap-3 pt-4 border-t border-dashed" style={{ borderColor: 'rgba(58,77,57,0.3)' }}>
+                <div className="w-9 h-9 rounded-full bg-mustard flex items-center justify-center text-sm font-extrabold text-ink border-2 border-ink">
                   {v.name[0]}
                 </div>
                 <div>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--forest)' }}>{v.name}</div>
-                  <div style={{ fontSize: 11, color: 'var(--forest)', opacity: 0.7, fontFamily: 'DM Mono, monospace' }}>
-                    {v.year}
-                  </div>
+                  <div className="text-[13px] font-bold text-forest">{v.name}</div>
+                  <div className="text-[11px] text-forest opacity-70 font-mono">{v.year}</div>
                 </div>
               </div>
             </div>
           ))}
         </div>
 
-        <p className="reveal" style={{
-          marginTop: 32,
-          fontSize: 11,
-          color: 'var(--forest)',
-          opacity: 0.5,
-          textAlign: 'center',
-          fontFamily: 'DM Mono, monospace'
-        }}>
+        <p className="reveal mt-8 text-[11px] text-forest opacity-50 text-center font-mono">
           ※ 仮の文面です。実際のメンバーのコメントに差し替え可能
         </p>
       </div>
@@ -826,64 +483,40 @@ function Voices() {
   );
 }
 
-// ============================================================
-// JOIN — the big CTA
-// ============================================================
+// JOIN
 function Join() {
   return (
-    <section id="join" style={{
-      background: 'var(--terra)',
-      color: 'var(--paper)',
-      padding: '140px 24px',
-      position: 'relative',
-      overflow: 'hidden'
-    }}>
-      <Decor top="40px" left="6%" rot={-12} size={60}><SunSVG color="#E8B04B"/></Decor>
+    <section id="join" className="bg-terra text-paper py-[140px] px-6 relative overflow-hidden">
+      <Decor top="40px" left="6%" rot={-12} size={60}><SunSVG/></Decor>
       <Decor bottom="60px" right="8%" rot={20} delay={1} size={50}><StarSVG color="#E8B04B"/></Decor>
       <Decor top="50%" right="5%" rot={0} size={70}><WaveSVG color="#E8B04B"/></Decor>
 
-      <div className="reveal" style={{ maxWidth: 900, margin: '0 auto', position: 'relative', zIndex: 2, textAlign: 'center' }}>
-        <span className="mono" style={{
-          fontSize: 13,
-          color: 'var(--mustard)',
-          letterSpacing: '0.15em',
-          fontWeight: 600,
-          display: 'inline-block',
-          marginBottom: 24
-        }}>
+      <div className="reveal max-w-[900px] mx-auto relative z-[2] text-center">
+        <span className="font-mono text-[13px] text-mustard tracking-[0.15em] font-semibold inline-block mb-6">
           06 — JOIN US
         </span>
 
-        <h2 className="display" style={{
-          fontSize: 'clamp(48px, 9vw, 120px)',
-          lineHeight: 0.92,
-          fontWeight: 800,
-          letterSpacing: '-0.04em',
-          margin: '0 0 32px'
-        }}>
+        <h2
+          className="font-display font-extrabold m-0 mb-8"
+          style={{ fontSize: 'clamp(48px, 9vw, 120px)', lineHeight: 0.92, letterSpacing: '-0.04em' }}
+        >
           一緒に、<br/>
-          <span style={{ fontStyle: 'italic', color: 'var(--mustard)', fontWeight: 600 }}>島へ。</span>
+          <span className="italic text-mustard font-semibold">島へ。</span>
         </h2>
 
-        <p className="maru" style={{
-          fontSize: 18,
-          lineHeight: 2,
-          fontWeight: 500,
-          maxWidth: 580,
-          margin: '0 auto 48px'
-        }}>
+        <p className="font-maru text-lg leading-loose font-medium max-w-[580px] mx-auto mb-12">
           学年・学部、関係なし。<br/>
           まずはInstagramのDMから、お気軽に声をかけてください。<br/>
           毎週火曜のミーティングに、見学に来るのもOK。
         </p>
 
-        <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', justifyContent: 'center', marginBottom: 48 }}>
+        <div className="flex gap-4 flex-wrap justify-center mb-12">
           <a
             href="https://www.instagram.com/est_waseda/"
             target="_blank"
             rel="noopener noreferrer"
             className="btn-primary"
-            style={{ background: 'var(--paper)', color: 'var(--terra)', boxShadow: '4px 4px 0 var(--ink)' }}
+            style={{ background: '#FBF7EE', color: '#C8553D', boxShadow: '4px 4px 0 #1F2A1E' }}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <rect x="3" y="3" width="18" height="18" rx="5"/>
@@ -895,33 +528,16 @@ function Join() {
           <a
             href="mailto:est.2019.16th@gmail.com"
             className="btn-primary"
-            style={{ background: 'var(--forest)', color: 'var(--paper)', boxShadow: '4px 4px 0 var(--ink)' }}
+            style={{ background: '#3A4D39', color: '#FBF7EE', boxShadow: '4px 4px 0 #1F2A1E' }}
           >
             <span>メールで聞く</span>
-            <span style={{ fontSize: 22 }}>✉</span>
+            <span className="text-[22px]">✉</span>
           </a>
         </div>
 
-        {/* Contact card */}
-        <div style={{
-          background: 'var(--paper)',
-          color: 'var(--ink)',
-          padding: '32px 28px',
-          maxWidth: 560,
-          margin: '0 auto',
-          textAlign: 'left',
-          borderRadius: 4,
-          boxShadow: '6px 6px 0 var(--ink)'
-        }}>
-          <div className="mono" style={{
-            fontSize: 11,
-            color: 'var(--terra)',
-            letterSpacing: '0.15em',
-            fontWeight: 600,
-            marginBottom: 16
-          }}>
-            CONTACT
-          </div>
+        <div className="bg-paper text-ink py-8 px-7 max-w-[560px] mx-auto text-left rounded-[4px]"
+             style={{ boxShadow: '6px 6px 0 #1F2A1E' }}>
+          <div className="font-mono text-[11px] text-terra tracking-[0.15em] font-semibold mb-4">CONTACT</div>
           <ContactRow k="代表" v="柴田 拓郎" sub="早稲田大学 教育学部 3年" />
           <ContactRow k="メール" v="est.2019.16th@gmail.com" link="mailto:est.2019.16th@gmail.com" />
           <ContactRow k="Instagram" v="@est_waseda" link="https://www.instagram.com/est_waseda/" />
@@ -935,122 +551,45 @@ function Join() {
 }
 
 function ContactRow({ k, v, sub, link, last }) {
-  const content = (
+  const inner = (
     <>
-      <span style={{ fontSize: 12, color: 'var(--forest)', opacity: 0.7, fontWeight: 600, fontFamily: 'DM Mono, monospace', minWidth: 110 }}>
-        {k}
-      </span>
-      <span style={{ flex: 1, fontSize: 14, fontWeight: 600 }}>
+      <span className="text-[12px] text-forest opacity-70 font-semibold font-mono min-w-[110px]">{k}</span>
+      <span className="flex-1 text-sm font-semibold">
         {v}
-        {sub && <span style={{ display: 'block', fontSize: 12, fontWeight: 400, opacity: 0.7, marginTop: 2 }}>{sub}</span>}
+        {sub && <span className="block text-[12px] font-normal opacity-70 mt-0.5">{sub}</span>}
       </span>
-      {link && <span style={{ color: 'var(--terra)', fontSize: 14 }}>↗</span>}
+      {link && <span className="text-terra text-sm">↗</span>}
     </>
   );
-  const style = {
-    display: 'flex',
-    alignItems: 'baseline',
-    gap: 12,
-    padding: '12px 0',
-    borderBottom: last ? 'none' : '1px dashed rgba(58,77,57,0.25)',
-    textDecoration: 'none',
-    color: 'var(--ink)'
-  };
+  const cls = `flex items-baseline gap-3 py-3 no-underline text-ink ${last ? '' : 'border-b border-dashed'}`;
+  const style = last ? {} : { borderColor: 'rgba(58,77,57,0.25)' };
   return link ? (
-    <a href={link} target="_blank" rel="noopener noreferrer" style={style}>{content}</a>
+    <a href={link} target="_blank" rel="noopener noreferrer" className={cls} style={style}>{inner}</a>
   ) : (
-    <div style={style}>{content}</div>
+    <div className={cls} style={style}>{inner}</div>
   );
 }
 
-// ============================================================
 // FOOTER
-// ============================================================
 function Footer() {
   return (
-    <footer style={{
-      background: 'var(--ink)',
-      color: 'var(--cream)',
-      padding: '60px 24px 32px',
-      textAlign: 'center'
-    }}>
-      <div style={{ maxWidth: 800, margin: '0 auto' }}>
-        <div className="display" style={{
-          fontSize: 80,
-          fontWeight: 800,
-          letterSpacing: '-0.04em',
-          color: 'var(--mustard)',
-          fontStyle: 'italic',
-          lineHeight: 1
-        }}>
+    <footer className="bg-ink text-cream py-16 pb-8 px-6 text-center">
+      <div className="max-w-[800px] mx-auto">
+        <div className="font-display text-[80px] font-extrabold tracking-tighter text-mustard italic leading-none">
           EST.
         </div>
-        <p style={{ fontSize: 13, opacity: 0.6, marginTop: 16, fontFamily: 'DM Mono, monospace' }}>
-          学生NGO EST · Waseda University · est.2003
-        </p>
-        <p style={{ fontSize: 11, opacity: 0.4, marginTop: 24 }}>
-          © 学生NGO EST. Made with care for the kids of Pandanon Island.
-        </p>
+        <p className="text-[13px] opacity-60 mt-4 font-mono">学生NGO EST · Waseda University · est.2003</p>
+        <p className="text-[11px] opacity-40 mt-6">© 学生NGO EST. Made with care for the kids of Pandanon Island.</p>
       </div>
     </footer>
   );
 }
 
-// ============================================================
-// TWEAKS PANEL CONTENT
-// ============================================================
-function TweaksContent({ tweaks, setTweak }) {
-  return (
-    <>
-      <TweakSection title="カラー">
-        <TweakColor label="メインカラー (terra)" value={tweaks.primaryColor} onChange={(v) => {
-          setTweak('primaryColor', v);
-          document.documentElement.style.setProperty('--terra', v);
-        }} />
-        <TweakColor label="サブカラー (forest)" value={tweaks.forestColor} onChange={(v) => {
-          setTweak('forestColor', v);
-          document.documentElement.style.setProperty('--forest', v);
-        }} />
-        <TweakColor label="アクセント (mustard)" value={tweaks.mustardColor} onChange={(v) => {
-          setTweak('mustardColor', v);
-          document.documentElement.style.setProperty('--mustard', v);
-        }} />
-        <TweakColor label="背景 (cream)" value={tweaks.creamColor} onChange={(v) => {
-          setTweak('creamColor', v);
-          document.documentElement.style.setProperty('--cream', v);
-        }} />
-      </TweakSection>
-      <TweakSection title="表示">
-        <TweakRadio
-          label="ステッカー表示"
-          value={tweaks.showStickers ? "on" : "off"}
-          options={[{value: "on", label: "ON"}, {value: "off", label: "OFF"}]}
-          onChange={(v) => setTweak('showStickers', v === "on")}
-        />
-      </TweakSection>
-    </>
-  );
-}
-
-// ============================================================
-// MAIN APP
-// ============================================================
 function App() {
-  const [tweaks, setTweak] = useTweaks(TWEAK_DEFAULTS);
-
-  // Apply CSS vars on mount
-  useEffect(() => {
-    document.documentElement.style.setProperty('--terra', tweaks.primaryColor);
-    document.documentElement.style.setProperty('--forest', tweaks.forestColor);
-    document.documentElement.style.setProperty('--mustard', tweaks.mustardColor);
-    document.documentElement.style.setProperty('--cream', tweaks.creamColor);
-  }, []);
-
   useReveal();
-
   return (
     <>
-      <Hero tweaks={tweaks} />
+      <Hero />
       <Marquee />
       <About />
       <HeartSection />
@@ -1059,9 +598,6 @@ function App() {
       <Voices />
       <Join />
       <Footer />
-      <TweaksPanel title="Tweaks">
-        <TweaksContent tweaks={tweaks} setTweak={setTweak} />
-      </TweaksPanel>
     </>
   );
 }
